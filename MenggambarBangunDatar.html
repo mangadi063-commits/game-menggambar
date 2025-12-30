@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Menggambar Bangun Datar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 15px;
+            color: white;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-item h3 {
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+
+        .score-item p {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .challenge {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .challenge h2 {
+            color: #333;
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .shape-name {
+            font-size: 2.5em;
+            color: #667eea;
+            font-weight: bold;
+            text-transform: uppercase;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .canvas-container {
+            position: relative;
+            margin: 20px auto;
+            border: 5px solid #667eea;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background: white;
+        }
+
+        canvas {
+            display: block;
+            cursor: crosshair;
+            background: white;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        button:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-clear {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-check {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .feedback {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.5em;
+            font-weight: bold;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feedback.correct {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            display: block;
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .color-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .color-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .color-btn.active {
+            border: 3px solid #333;
+            transform: scale(1.1);
+        }
+
+        .instructions {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Game Menggambar Bangun Datar 🎨</h1>
+        </div>
+
+        <div class="score-board">
+            <div class="score-item">
+                <h3>✓ Benar</h3>
+                <p id="correct-score">0</p>
+            </div>
+            <div class="score-item">
+                <h3>✗ Salah</h3>
+                <p id="incorrect-score">0</p>
+            </div>
+            <div class="score-item">
+                <h3>🏆 Total</h3>
+                <p id="total-score">0</p>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <p>📝 Klik dan tahan mouse untuk menggambar bangun datar sesuai petunjuk! Tidak perlu sempurna, yang penting bentuknya mirip! 😊</p>
+        </div>
+
+        <div class="challenge">
+            <h2>Gambar Bangun Datar:</h2>
+            <div class="shape-name" id="shape-name">PERSEGI</div>
+        </div>
+
+        <div class="color-palette">
+            <div class="color-btn active" style="background: #000000;" data-color="#000000"></div>
+            <div class="color-btn" style="background: #ff6b6b;" data-color="#ff6b6b"></div>
+            <div class="color-btn" style="background: #4ecdc4;" data-color="#4ecdc4"></div>
+            <div class="color-btn" style="background: #45b7d1;" data-color="#45b7d1"></div>
+            <div class="color-btn" style="background: #f9ca24;" data-color="#f9ca24"></div>
+            <div class="color-btn" style="background: #6c5ce7;" data-color="#6c5ce7"></div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="drawing-canvas" width="800" height="500"></canvas>
+        </div>
+
+        <div class="controls">
+            <button class="btn-clear" onclick="clearCanvas()">🗑️ Hapus</button>
+            <button class="btn-check" onclick="checkDrawing()">✓ Cek Jawaban</button>
+            <button class="btn-next" onclick="nextShape()">➡️ Soal Berikutnya</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+    </div>
+
+    <script>
+        // Audio context untuk sound effects
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        // Background music (ambient relaxing sound)
+        let bgMusicOscillator = null;
+        let bgMusicGain = null;
+
+        function playBackgroundMusic() {
+            if (bgMusicOscillator) return;
+            
+            bgMusicOscillator = audioCtx.createOscillator();
+            bgMusicGain = audioCtx.createGain();
+            
+            bgMusicOscillator.type = 'sine';
+            bgMusicOscillator.frequency.setValueAtTime(220, audioCtx.currentTime);
+            bgMusicGain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+            
+            bgMusicOscillator.connect(bgMusicGain);
+            bgMusicGain.connect(audioCtx.destination);
+            bgMusicOscillator.start();
+        }
+
+        function playSound(type) {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            switch(type) {
+                case 'click':
+                    oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+                    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                    oscillator.start(audioCtx.currentTime);
+                    oscillator.stop(audioCtx.currentTime + 0.1);
+                    break;
+                case 'correct':
+                    oscillator.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                    oscillator.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
+                    oscillator.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2);
+                    gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    oscillator.start(audioCtx.currentTime);
+                    oscillator.stop(audioCtx.currentTime + 0.4);
+                    break;
+                case 'incorrect':
+                    oscillator.frequency.setValueAtTime(200, audioCtx.currentTime);
+                    oscillator.frequency.setValueAtTime(150, audioCtx.currentTime + 0.2);
+                    gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    oscillator.start(audioCtx.currentTime);
+                    oscillator.stop(audioCtx.currentTime + 0.3);
+                    break;
+                case 'draw':
+                    oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+                    gainNode.gain.setValueAtTime(0.03, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                    oscillator.start(audioCtx.currentTime);
+                    oscillator.stop(audioCtx.currentTime + 0.05);
+                    break;
+            }
+        }
+
+        // Canvas setup
+        const canvas = document.getElementById('drawing-canvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let currentColor = '#000000';
+        let points = [];
+
+        // Shapes list
+        const shapes = [
+            'PERSEGI',
+            'PERSEGI PANJANG',
+            'SEGITIGA',
+            'LINGKARAN',
+            'TRAPESIUM',
+            'JAJAR GENJANG',
+            'BELAH KETUPAT',
+            'LAYANG-LAYANG',
+            'SEGI LIMA',
+            'SEGI ENAM'
+        ];
+
+        let currentShapeIndex = 0;
+        let correctCount = 0;
+        let incorrectCount = 0;
+        let totalAttempts = 0;
+
+        // Color palette
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                playSound('click');
+                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentColor = this.dataset.color;
+            });
+        });
+
+        // Drawing functions
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        // Touch support
+        canvas.addEventListener('touchstart', handleTouch);
+        canvas.addEventListener('touchmove', handleTouch);
+        canvas.addEventListener('touchend', stopDrawing);
+
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 'mousemove', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        }
+
+        function startDrawing(e) {
+            playBackgroundMusic();
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            points = [{
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            }];
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            points.push({x, y});
+            
+            ctx.beginPath();
+            ctx.moveTo(points[points.length - 2].x, points[points.length - 2].y);
+            ctx.lineTo(x, y);
+            ctx.strokeStyle = currentColor;
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+            
+            if (Math.random() > 0.8) playSound('draw');
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function clearCanvas() {
+            playSound('click');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            points = [];
+            document.getElementById('feedback').style.display = 'none';
+        }
+
+        function checkDrawing() {
+            playSound('click');
+            
+            if (points.length < 10) {
+                showFeedback('Gambar terlalu sedikit! Coba gambar lebih lengkap 😊', false);
+                return;
+            }
+
+            const currentShape = shapes[currentShapeIndex];
+            const isCorrect = analyzeShape(points, currentShape);
+            
+            totalAttempts++;
+            
+            if (isCorrect) {
+                correctCount++;
+                playSound('correct');
+                showFeedback(`🎉 BENAR! Gambar ${currentShape} kamu sempurna! 🎉`, true);
+            } else {
+                incorrectCount++;
+                playSound('incorrect');
+                showFeedback(`❌ Belum tepat. Coba lagi untuk membuat ${currentShape} yang lebih baik! 💪`, false);
+            }
+            
+            updateScores();
+        }
+
+        function analyzeShape(points, shapeName) {
+            if (points.length < 10) return false;
+
+            const corners = detectCorners(points);
+            const isClosed = isShapeClosed(points);
+            const aspectRatio = getAspectRatio(points);
+            const area = getShapeArea(points);
+            
+            // Kriteria yang lebih toleran untuk siswa
+            switch(shapeName) {
+                case 'PERSEGI':
+                    // Harus punya 4 sudut (toleransi 3-6), tertutup, dan mendekati persegi (ratio 0.6-1.5)
+                    return corners >= 3 && corners <= 6 && isClosed && 
+                           aspectRatio > 0.6 && aspectRatio < 1.5 && area > 2000;
+                
+                case 'PERSEGI PANJANG':
+                    // Harus punya 4 sudut, tertutup, dan memanjang (ratio tidak 1:1)
+                    return corners >= 3 && corners <= 6 && isClosed && 
+                           (aspectRatio < 0.7 || aspectRatio > 1.4) && area > 2000;
+                
+                case 'SEGITIGA':
+                    // Harus punya 3 sudut (toleransi 2-5), tertutup
+                    return corners >= 2 && corners <= 5 && isClosed && area > 1500;
+                
+                case 'LINGKARAN':
+                    // Bentuk bulat dan tertutup (toleransi tinggi)
+                    return isCircular(points) && isClosed && area > 2000;
+                
+                case 'TRAPESIUM':
+                    // 4 sudut, tertutup
+                    return corners >= 3 && corners <= 6 && isClosed && area > 2000;
+                
+                case 'JAJAR GENJANG':
+                    // 4 sudut, tertutup, agak miring
+                    return corners >= 3 && corners <= 6 && isClosed && area > 2000;
+                
+                case 'BELAH KETUPAT':
+                    // 4 sudut, tertutup
+                    return corners >= 3 && corners <= 6 && isClosed && area > 2000;
+                
+                case 'LAYANG-LAYANG':
+                    // 4 sudut, tertutup
+                    return corners >= 3 && corners <= 6 && isClosed && area > 2000;
+                
+                case 'SEGI LIMA':
+                    // 5 sudut (toleransi 4-7), tertutup
+                    return corners >= 4 && corners <= 7 && isClosed && area > 2000;
+                
+                case 'SEGI ENAM':
+                    // 6 sudut (toleransi 5-9), tertutup
+                    return corners >= 5 && corners <= 9 && isClosed && area > 2000;
+                
+                default:
+                    return false;
+            }
+        }
+
+        function detectCorners(points) {
+            let corners = 0;
+            const angleThreshold = 140; // Lebih toleran untuk sudut yang tidak sempurna
+            const minDistanceBetweenCorners = 30; // Jarak minimum antar sudut
+            let lastCornerIndex = -minDistanceBetweenCorners;
+            
+            for (let i = 5; i < points.length - 5; i += 3) { // Skip beberapa titik untuk performa
+                if (i - lastCornerIndex < minDistanceBetweenCorners) continue;
+                
+                const angle = calculateAngle(points[i-5], points[i], points[i+5]);
+                
+                if (angle < angleThreshold) {
+                    corners++;
+                    lastCornerIndex = i;
+                }
+            }
+            
+            return corners;
+        }
+        
+        function getShapeArea(points) {
+            if (points.length < 3) return 0;
+            
+            let area = 0;
+            for (let i = 0; i < points.length; i++) {
+                const j = (i + 1) % points.length;
+                area += points[i].x * points[j].y;
+                area -= points[j].x * points[i].y;
+            }
+            return Math.abs(area / 2);
+        }
+
+        function calculateAngle(p1, p2, p3) {
+            const v1 = {x: p1.x - p2.x, y: p1.y - p2.y};
+            const v2 = {x: p3.x - p2.x, y: p3.y - p2.y};
+            const dot = v1.x * v2.x + v1.y * v2.y;
+            const mag1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y);
+            const mag2 = Math.sqrt(v2.x * v2.x + v2.y * v2.y);
+            return Math.acos(dot / (mag1 * mag2)) * 180 / Math.PI;
+        }
+
+        function isShapeClosed(points) {
+            if (points.length < 3) return false;
+            const first = points[0];
+            const last = points[points.length - 1];
+            const distance = Math.sqrt(Math.pow(last.x - first.x, 2) + Math.pow(last.y - first.y, 2));
+            // Toleransi lebih besar untuk bentuk tertutup (100 pixel)
+            return distance < 100;
+        }
+
+        function getAspectRatio(points) {
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            points.forEach(p => {
+                minX = Math.min(minX, p.x);
+                maxX = Math.max(maxX, p.x);
+                minY = Math.min(minY, p.y);
+                maxY = Math.max(maxY, p.y);
+            });
+            const width = maxX - minX;
+            const height = maxY - minY;
+            return width / height;
+        }
+
+        function isCircular(points) {
+            const center = points.reduce((acc, p) => ({
+                x: acc.x + p.x / points.length,
+                y: acc.y + p.y / points.length
+            }), {x: 0, y: 0});
+            
+            const distances = points.map(p => 
+                Math.sqrt(Math.pow(p.x - center.x, 2) + Math.pow(p.y - center.y, 2))
+            );
+            
+            const avgDistance = distances.reduce((a, b) => a + b) / distances.length;
+            const variance = distances.reduce((acc, d) => acc + Math.pow(d - avgDistance, 2), 0) / distances.length;
+            
+            // Toleransi lebih besar untuk bentuk melingkar (50% dari rata-rata)
+            return variance < avgDistance * 0.5 && avgDistance > 30;
+        }
+
+        function showFeedback(message, isCorrect) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = message;
+            feedback.className = 'feedback ' + (isCorrect ? 'correct' : 'incorrect');
+            feedback.style.display = 'block';
+        }
+
+        function updateScores() {
+            document.getElementById('correct-score').textContent = correctCount;
+            document.getElementById('incorrect-score').textContent = incorrectCount;
+            document.getElementById('total-score').textContent = totalAttempts;
+        }
+
+        function nextShape() {
+            playSound('click');
+            currentShapeIndex = (currentShapeIndex + 1) % shapes.length;
+            document.getElementById('shape-name').textContent = shapes[currentShapeIndex];
+            clearCanvas();
+        }
+
+        // Initialize
+        document.getElementById('shape-name').textContent = shapes[currentShapeIndex];
+    </script>
+</body>
+</html>
